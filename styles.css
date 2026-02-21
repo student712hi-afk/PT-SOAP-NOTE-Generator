@@ -1,0 +1,150 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.4;
+
+  --bg: #0b1020;
+  --bg-elev: #121a2f;
+  --bg-soft: #1a2440;
+  --text: #ecf2ff;
+  --text-dim: #a9b6d3;
+  --border: #2a3860;
+  --primary: #5c8dff;
+  --primary-strong: #4e7ef2;
+  --secondary: #2a3557;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #121b35 0%, var(--bg) 50%);
+  color: var(--text);
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin-top: 0;
+}
+
+p {
+  color: var(--text-dim);
+}
+
+.card {
+  background: rgba(18, 26, 47, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  resize: vertical;
+  background: #0f162b;
+  color: var(--text);
+}
+
+textarea::placeholder {
+  color: #8592b0;
+}
+
+.actions {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: var(--secondary);
+  color: #dce5ff;
+}
+
+button:hover {
+  background: var(--primary-strong);
+}
+
+button.secondary:hover {
+  background: #39496e;
+}
+
+button.mic.recording {
+  background: #dd4b7c;
+}
+
+.hidden {
+  display: none;
+}
+
+.status {
+  font-size: 0.9rem;
+  color: #90e8b2;
+  margin-top: 0.6rem;
+}
+
+ul {
+  margin-top: 0.4rem;
+  padding-left: 1.2rem;
+}
+
+li {
+  color: var(--text-dim);
+}
+
+.soap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+}
+
+.soap-grid > div {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+.disclaimer {
+  font-size: 0.85rem;
+  color: #93a2c5;
+  margin-top: 0.7rem;
+}
