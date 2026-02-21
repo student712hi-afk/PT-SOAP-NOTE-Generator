@@ -251,6 +251,7 @@ function buildSummary(text, signals) {
 }
 
 function buildSoap(signals, profile) {
+function buildSoap(text, signals, profile) {
   const subjective = [
     'Patient-reported history transcribed from interview.',
     signals.duration ? `Symptoms ongoing for ${signals.duration}.` : null,
@@ -291,6 +292,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   renderList(redFlagsEl, profile.redFlags);
 
   const soap = buildSoap(signals, profile);
+  const soap = buildSoap(text, signals, profile);
   soapSubjectiveEl.textContent = soap.subjective;
   soapObjectiveEl.textContent = soap.objective;
   soapAssessmentEl.textContent = soap.assessment;
@@ -307,3 +309,4 @@ document.getElementById('clearBtn').addEventListener('click', () => {
 
 micBtn.addEventListener('click', toggleDictation);
 setupSpeechRecognition();
+});
