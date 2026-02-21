@@ -13,18 +13,31 @@ const soapObjectiveEl = document.getElementById('soapObjective');
 const soapAssessmentEl = document.getElementById('soapAssessment');
 const soapPlanEl = document.getElementById('soapPlan');
 
+const generateBtn = document.getElementById('generateBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+const requiredElements = [
+  inputEl,
+  outputEl,
+  micBtn,
+  micStatusEl,
+  caseSummaryEl,
+  assessmentsEl,
+  physicalExamEl,
+  redFlagsEl,
+  soapSubjectiveEl,
+  soapObjectiveEl,
+  soapAssessmentEl,
+  soapPlanEl,
+  generateBtn,
+  clearBtn,
+];
+
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
 let recognition = null;
 let isRecording = false;
-
-function isSpeechRecognitionAvailable() {
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1';
-  return Boolean(SpeechRecognition) && (window.isSecureContext || isLocalhost);
-}
 
 const keywordProfiles = [
   {
@@ -127,8 +140,19 @@ const defaults = {
 };
 
 function setMicStatus(message, isVisible = true) {
+  if (!micStatusEl) {
+    return;
+  }
   micStatusEl.textContent = message;
   micStatusEl.classList.toggle('hidden', !isVisible);
+}
+
+function isSpeechRecognitionAvailable() {
+  const isLocalhost =
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '::1';
+  return Boolean(SpeechRecognition) && (window.isSecureContext || isLocalhost);
 }
 
 function setupSpeechRecognition() {
@@ -190,6 +214,12 @@ function setupSpeechRecognition() {
   };
 }
 
+function stopDictationIfActive() {
+  if (recognition && isRecording) {
+    recognition.stop();
+  }
+}
+
 function toggleDictation() {
   if (!recognition) {
     return;
@@ -202,8 +232,9 @@ function toggleDictation() {
       recognition.start();
     }
   } catch (error) {
+    const message = error?.message || 'unknown error';
     setMicStatus(
-      `Unable to start dictation (${error.message}). Check microphone permissions and try again.`
+      `Unable to start dictation (${message}). Check microphone permissions and try again.`
     );
     isRecording = false;
     micBtn.textContent = '🎤 Start dictation';
@@ -294,38 +325,44 @@ function buildSoap(signals, profile) {
   return { subjective, objective, assessment, plan };
 }
 
-document.getElementById('generateBtn').addEventListener('click', () => {
-  const text = inputEl.value.trim();
-  if (!text) {
-    alert('Please enter patient conversation notes first.');
-    return;
-  }
+function initApp() {
+  generateBtn.addEventListener('click', () => {
+    const text = inputEl.value.trim();
+    if (!text) {
+      alert('Please enter patient conversation notes first.');
+      return;
+    }
 
-  const signals = extractSignals(text);
-  const profile = inferProfile(text);
+    const signals = extractSignals(text);
+    const profile = inferProfile(text);
 
-  caseSummaryEl.textContent = buildSummary(text, signals);
-  renderList(assessmentsEl, profile.assessments);
-  renderList(physicalExamEl, profile.exams);
-  renderList(redFlagsEl, profile.redFlags);
+    caseSummaryEl.textContent = buildSummary(text, signals);
+    renderList(assessmentsEl, profile.assessments);
+    renderList(physicalExamEl, profile.exams);
+    renderList(redFlagsEl, profile.redFlags);
 
-  const soap = buildSoap(signals, profile);
-  soapSubjectiveEl.textContent = soap.subjective;
-  soapObjectiveEl.textContent = soap.objective;
-  soapAssessmentEl.textContent = soap.assessment;
-  soapPlanEl.textContent = soap.plan;
+    const soap = buildSoap(signals, profile);
+    soapSubjectiveEl.textContent = soap.subjective;
+    soapObjectiveEl.textContent = soap.objective;
+    soapAssessmentEl.textContent = soap.assessment;
+    soapPlanEl.textContent = soap.plan;
 
-  outputEl.classList.remove('hidden');
-});
+    outputEl.classList.remove('hidden');
+  });
 
-document.getElementById('clearBtn').addEventListener('click', () => {
-  if (recognition && isRecording) {
-    recognition.stop();
-  }
-  inputEl.value = '';
-  outputEl.classList.add('hidden');
-  setMicStatus('', false);
-});
+  clearBtn.addEventListener('click', () => {
+    stopDictationIfActive();
+    inputEl.value = '';
+    outputEl.classList.add('hidden');
+    setMicStatus('', false);
+  });
 
-micBtn.addEventListener('click', toggleDictation);
-setupSpeechRecognition();
+  micBtn.addEventListener('click', toggleDictation);
+  setupSpeechRecognition();
+}
+
+if (requiredElements.some((el) => !el)) {
+  console.error('App failed to initialize: one or more required DOM elements are missing.');
+} else {
+  initApp();
+}
