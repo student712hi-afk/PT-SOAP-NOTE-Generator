@@ -13,26 +13,6 @@ const soapObjectiveEl = document.getElementById('soapObjective');
 const soapAssessmentEl = document.getElementById('soapAssessment');
 const soapPlanEl = document.getElementById('soapPlan');
 
-const generateBtn = document.getElementById('generateBtn');
-const clearBtn = document.getElementById('clearBtn');
-
-const requiredElements = [
-  inputEl,
-  outputEl,
-  micBtn,
-  micStatusEl,
-  caseSummaryEl,
-  assessmentsEl,
-  physicalExamEl,
-  redFlagsEl,
-  soapSubjectiveEl,
-  soapObjectiveEl,
-  soapAssessmentEl,
-  soapPlanEl,
-  generateBtn,
-  clearBtn,
-];
-
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
@@ -140,28 +120,14 @@ const defaults = {
 };
 
 function setMicStatus(message, isVisible = true) {
-  if (!micStatusEl) {
-    return;
-  }
   micStatusEl.textContent = message;
   micStatusEl.classList.toggle('hidden', !isVisible);
 }
 
-function isSpeechRecognitionAvailable() {
-  const isLocalhost =
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === '::1';
-  return Boolean(SpeechRecognition) && (window.isSecureContext || isLocalhost);
-}
-
 function setupSpeechRecognition() {
-  if (!isSpeechRecognitionAvailable()) {
+  if (!SpeechRecognition) {
     micBtn.disabled = true;
-    setMicStatus(
-      'Microphone dictation needs a supported browser and HTTPS (or localhost).',
-      true
-    );
+    setMicStatus('Microphone dictation is not supported in this browser.', true);
     return;
   }
 
@@ -214,31 +180,15 @@ function setupSpeechRecognition() {
   };
 }
 
-function stopDictationIfActive() {
-  if (recognition && isRecording) {
-    recognition.stop();
-  }
-}
-
 function toggleDictation() {
   if (!recognition) {
     return;
   }
 
-  try {
-    if (isRecording) {
-      recognition.stop();
-    } else {
-      recognition.start();
-    }
-  } catch (error) {
-    const message = error?.message || 'unknown error';
-    setMicStatus(
-      `Unable to start dictation (${message}). Check microphone permissions and try again.`
-    );
-    isRecording = false;
-    micBtn.textContent = '🎤 Start dictation';
-    micBtn.classList.remove('recording');
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    recognition.start();
   }
 }
 
@@ -301,6 +251,7 @@ function buildSummary(text, signals) {
 }
 
 function buildSoap(signals, profile) {
+function buildSoap(text, signals, profile) {
   const subjective = [
     'Patient-reported history transcribed from interview.',
     signals.duration ? `Symptoms ongoing for ${signals.duration}.` : null,
@@ -325,44 +276,37 @@ function buildSoap(signals, profile) {
   return { subjective, objective, assessment, plan };
 }
 
-function initApp() {
-  generateBtn.addEventListener('click', () => {
-    const text = inputEl.value.trim();
-    if (!text) {
-      alert('Please enter patient conversation notes first.');
-      return;
-    }
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const text = inputEl.value.trim();
+  if (!text) {
+    alert('Please enter patient conversation notes first.');
+    return;
+  }
 
-    const signals = extractSignals(text);
-    const profile = inferProfile(text);
+  const signals = extractSignals(text);
+  const profile = inferProfile(text);
 
-    caseSummaryEl.textContent = buildSummary(text, signals);
-    renderList(assessmentsEl, profile.assessments);
-    renderList(physicalExamEl, profile.exams);
-    renderList(redFlagsEl, profile.redFlags);
+  caseSummaryEl.textContent = buildSummary(text, signals);
+  renderList(assessmentsEl, profile.assessments);
+  renderList(physicalExamEl, profile.exams);
+  renderList(redFlagsEl, profile.redFlags);
 
-    const soap = buildSoap(signals, profile);
-    soapSubjectiveEl.textContent = soap.subjective;
-    soapObjectiveEl.textContent = soap.objective;
-    soapAssessmentEl.textContent = soap.assessment;
-    soapPlanEl.textContent = soap.plan;
+  const soap = buildSoap(signals, profile);
+  const soap = buildSoap(text, signals, profile);
+  soapSubjectiveEl.textContent = soap.subjective;
+  soapObjectiveEl.textContent = soap.objective;
+  soapAssessmentEl.textContent = soap.assessment;
+  soapPlanEl.textContent = soap.plan;
 
-    outputEl.classList.remove('hidden');
-  });
+  outputEl.classList.remove('hidden');
+});
 
-  clearBtn.addEventListener('click', () => {
-    stopDictationIfActive();
-    inputEl.value = '';
-    outputEl.classList.add('hidden');
-    setMicStatus('', false);
-  });
+document.getElementById('clearBtn').addEventListener('click', () => {
+  inputEl.value = '';
+  outputEl.classList.add('hidden');
+  setMicStatus('', false);
+});
 
-  micBtn.addEventListener('click', toggleDictation);
-  setupSpeechRecognition();
-}
-
-if (requiredElements.some((el) => !el)) {
-  console.error('App failed to initialize: one or more required DOM elements are missing.');
-} else {
-  initApp();
-}
+micBtn.addEventListener('click', toggleDictation);
+setupSpeechRecognition();
+});
