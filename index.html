@@ -11,6 +11,7 @@
       <header>
         <h1>PT SOAP Note Generator</h1>
         <p>
+          Paste, type, or dictate a patient conversation/interview and generate a structured
           Paste or type a patient conversation/interview and generate a structured
           clinical aide: SOAP draft, case summary, assessments, exam ideas, and
           red flags.
@@ -27,6 +28,10 @@
 
         <div class="actions">
           <button id="generateBtn" type="button">Generate clinical guide</button>
+          <button id="micBtn" type="button" class="secondary mic">🎤 Start dictation</button>
+          <button id="clearBtn" type="button" class="secondary">Clear</button>
+        </div>
+        <p id="micStatus" class="status hidden" aria-live="polite"></p>
           <button id="clearBtn" type="button" class="secondary">Clear</button>
         </div>
         <p class="disclaimer">

@@ -10,6 +10,12 @@ A lightweight browser app that helps transform a patient interview into a practi
 - Red flags to screen
 - SOAP note draft (Subjective, Objective, Assessment, Plan)
 
+## Features
+
+- Dark-theme UI for low-light usability
+- Text input for typed/pasted interview notes
+- Microphone dictation support (via browser Web Speech API when available)
+
 ## How to run
 
 Because this is a static app, you can run it with any simple static server.
@@ -24,3 +30,4 @@ Then open <http://localhost:4173> in your browser.
 
 - This tool is for documentation support and education.
 - It does **not** replace clinical reasoning, diagnosis, or local policy requirements.
+- Microphone support depends on browser compatibility/permissions.

@@ -1,5 +1,7 @@
 const inputEl = document.getElementById('patientInput');
 const outputEl = document.getElementById('output');
+const micBtn = document.getElementById('micBtn');
+const micStatusEl = document.getElementById('micStatus');
 
 const caseSummaryEl = document.getElementById('caseSummary');
 const assessmentsEl = document.getElementById('assessments');
@@ -10,6 +12,12 @@ const soapSubjectiveEl = document.getElementById('soapSubjective');
 const soapObjectiveEl = document.getElementById('soapObjective');
 const soapAssessmentEl = document.getElementById('soapAssessment');
 const soapPlanEl = document.getElementById('soapPlan');
+
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+let recognition = null;
+let isRecording = false;
 
 const keywordProfiles = [
   {
@@ -111,6 +119,79 @@ const defaults = {
   ],
 };
 
+function setMicStatus(message, isVisible = true) {
+  micStatusEl.textContent = message;
+  micStatusEl.classList.toggle('hidden', !isVisible);
+}
+
+function setupSpeechRecognition() {
+  if (!SpeechRecognition) {
+    micBtn.disabled = true;
+    setMicStatus('Microphone dictation is not supported in this browser.', true);
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    micBtn.textContent = '⏹ Stop dictation';
+    micBtn.classList.add('recording');
+    setMicStatus('Listening... speak naturally to capture conversation notes.');
+  };
+
+  recognition.onresult = (event) => {
+    let interimTranscript = '';
+    let finalTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const segment = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += `${segment} `;
+      } else {
+        interimTranscript += segment;
+      }
+    }
+
+    if (finalTranscript) {
+      const spacer = inputEl.value.trim().length ? ' ' : '';
+      inputEl.value += `${spacer}${finalTranscript.trim()}`;
+    }
+
+    setMicStatus(
+      interimTranscript
+        ? `Listening... ${interimTranscript}`
+        : 'Listening... speak naturally to capture conversation notes.'
+    );
+  };
+
+  recognition.onerror = (event) => {
+    setMicStatus(`Microphone error: ${event.error}. You can still type manually.`);
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    micBtn.textContent = '🎤 Start dictation';
+    micBtn.classList.remove('recording');
+    setMicStatus('Dictation stopped. You can restart it or generate your clinical guide.');
+  };
+}
+
+function toggleDictation() {
+  if (!recognition) {
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    recognition.start();
+  }
+}
+
 function inferProfile(text) {
   const lower = text.toLowerCase();
   const match = keywordProfiles.find((profile) =>
@@ -169,6 +250,7 @@ function buildSummary(text, signals) {
   return parts.join(' ');
 }
 
+function buildSoap(signals, profile) {
 function buildSoap(text, signals, profile) {
   const subjective = [
     'Patient-reported history transcribed from interview.',
@@ -209,6 +291,7 @@ document.getElementById('generateBtn').addEventListener('click', () => {
   renderList(physicalExamEl, profile.exams);
   renderList(redFlagsEl, profile.redFlags);
 
+  const soap = buildSoap(signals, profile);
   const soap = buildSoap(text, signals, profile);
   soapSubjectiveEl.textContent = soap.subjective;
   soapObjectiveEl.textContent = soap.objective;
@@ -221,4 +304,9 @@ document.getElementById('generateBtn').addEventListener('click', () => {
 document.getElementById('clearBtn').addEventListener('click', () => {
   inputEl.value = '';
   outputEl.classList.add('hidden');
+  setMicStatus('', false);
+});
+
+micBtn.addEventListener('click', toggleDictation);
+setupSpeechRecognition();
 });
