@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PT SOAP Note Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>PT SOAP Note Generator</h1>
+        <p>
+          Paste or type a patient conversation/interview and generate a structured
+          clinical aide: SOAP draft, case summary, assessments, exam ideas, and
+          red flags.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Patient interview input</h2>
+        <label for="patientInput">Patient transcript / notes</label>
+        <textarea
+          id="patientInput"
+          placeholder="Example: Patient reports low back pain for 3 weeks after lifting boxes. Pain is 6/10, worse with bending, no bowel or bladder changes..."
+        ></textarea>
+
+        <div class="actions">
+          <button id="generateBtn" type="button">Generate clinical guide</button>
+          <button id="clearBtn" type="button" class="secondary">Clear</button>
+        </div>
+        <p class="disclaimer">
+          For educational and clinical documentation support only. Always use
+          professional judgment and local standards of care.
+        </p>
+      </section>
+
+      <section id="output" class="card hidden">
+        <h2>Generated output</h2>
+
+        <article>
+          <h3>Case summary</h3>
+          <p id="caseSummary"></p>
+        </article>
+
+        <article>
+          <h3>Possible assessments to perform</h3>
+          <ul id="assessments"></ul>
+        </article>
+
+        <article>
+          <h3>Physical exam ideas</h3>
+          <ul id="physicalExam"></ul>
+        </article>
+
+        <article>
+          <h3>Red flags to screen</h3>
+          <ul id="redFlags"></ul>
+        </article>
+
+        <article>
+          <h3>SOAP note draft</h3>
+          <div class="soap-grid">
+            <div>
+              <h4>Subjective</h4>
+              <p id="soapSubjective"></p>
+            </div>
+            <div>
+              <h4>Objective</h4>
+              <p id="soapObjective"></p>
+            </div>
+            <div>
+              <h4>Assessment</h4>
+              <p id="soapAssessment"></p>
+            </div>
+            <div>
+              <h4>Plan</h4>
+              <p id="soapPlan"></p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
